@@ -148,8 +148,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
         if (!empty($extra['robo']['operations']['install'])) {
             // Right now we expect this to be a static callable, e.g.,
             // \\My\\Class::myCallbackMethod.
-            $install_callable = $extra['robo']['operations']['install'];
-            call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
+            // @todo Get this to actually work!
+            $install_callable = ltrim($extra['robo']['operations']['install'], '\\');
+            $this->composer->getEventDispatcher()->dispatchScript($install_callable, FALSE, [$this->io, $root_robo_extra]);
+            //call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
         }
     }
 }
