@@ -1,0 +1,9 @@
+{
+    "name": "grasmash/robo-plugin-manager",
+    "description": "Manages plugins for Robo.",
+    "type": "composer-plugin",
+    "require": {
+        "consolidation/robo": "^1.0"
+    },
+    "license": "MIT"
+}
