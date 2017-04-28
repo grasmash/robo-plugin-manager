@@ -3,7 +3,16 @@
     "description": "Manages plugins for Robo.",
     "type": "composer-plugin",
     "require": {
-        "consolidation/robo": "^1.0"
+        "consolidation/robo": "^1.0",
+        "composer-plugin-api": "^1.1"
     },
-    "license": "MIT"
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Robo\\": "src/"
+        }
+    },
+    "extra": {
+        "class": "Robo\\Composer\\Plugin"
+    }
 }
