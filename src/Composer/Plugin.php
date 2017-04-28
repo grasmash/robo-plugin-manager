@@ -129,7 +129,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
             // A package must have extra.Robo defined in composer.json in order
             // to be considered a Robo plugin.
             $extra = $package->getExtra();
-            if (!empty($extra['Robo'])) {
+            if (!empty($extra['robo'])) {
                 return TRUE;
             }
         }
@@ -141,6 +141,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
      * @param $package
      */
     protected function installOrUpdateRoboPlugin($package) {
-        // @todo Call the plugin's install method.
+        $extra = $package->getExtra();
+        if (!empty($extra['robo']['operations']['install'])) {
+            $operations = $extra['robo']['operations'];
+            foreach ($operations as $operation_name => $to_call) {
+
+            }
+        }
     }
 }
