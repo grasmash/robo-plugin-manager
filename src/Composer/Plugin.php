@@ -141,12 +141,15 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
      * @param $package
      */
     protected function installOrUpdateRoboPlugin($package) {
+        $root_extra = $this->composer->getPackage()->getExtra();
+        $root_robo_extra = !empty($root_extra['robo']) ? $root_extra['robo'] : [];
+
         $extra = $package->getExtra();
         if (!empty($extra['robo']['operations']['install'])) {
-            $operations = $extra['robo']['operations'];
-            foreach ($operations as $operation_name => $to_call) {
-
-            }
+            // Right now we expect this to be a static callable, e.g.,
+            // \\My\\Class::myCallbackMethod.
+            $install_callable = $extra['robo']['operations']['install'];
+            call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
         }
     }
 }
