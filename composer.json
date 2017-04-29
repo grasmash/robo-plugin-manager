@@ -14,5 +14,8 @@
     },
     "extra": {
         "class": "Robo\\Composer\\Plugin"
+    },
+    "require-dev": {
+        "composer/composer": "dev-master"
     }
 }

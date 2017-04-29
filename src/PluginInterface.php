@@ -15,5 +15,5 @@ interface PluginInterface {
      *
      * @return mixed
      */
-    public function install(IOInterface $io, array $extra);
+    public static function install(IOInterface $io, array $extra);
 }

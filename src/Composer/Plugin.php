@@ -22,7 +22,7 @@ use Composer\Util\Filesystem;
 class Plugin implements PluginInterface, EventSubscriberInterface {
 
     /**
-     * @var Composer
+     * @var \Composer\Composer
      */
     protected $composer;
     /**
@@ -138,20 +138,32 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
     }
 
     /**
-     * @param $package
+     * @param \Composer\Package\PackageInterface $package
      */
-    protected function installOrUpdateRoboPlugin($package) {
+    protected function installOrUpdateRoboPlugin(PackageInterface $package) {
         $root_extra = $this->composer->getPackage()->getExtra();
         $root_robo_extra = !empty($root_extra['robo']) ? $root_extra['robo'] : [];
+        $package_map = $this->composer->getAutoloadGenerator()->buildPackageMap(
+          $this->composer->getInstallationManager(),
+          $this->composer->getPackage(),
+          [$package]
+        );
+        $autoloads = $this->composer->getAutoloadGenerator()->parseAutoloads(
+          $package_map,
+          $this->composer->getPackage()
+        );
+        $loader = $this->composer->getAutoloadGenerator()->createLoader($autoloads);
 
         $extra = $package->getExtra();
         if (!empty($extra['robo']['operations']['install'])) {
             // Right now we expect this to be a static callable, e.g.,
             // \\My\\Class::myCallbackMethod.
-            // @todo Get this to actually work!
             $install_callable = ltrim($extra['robo']['operations']['install'], '\\');
-            $this->composer->getEventDispatcher()->dispatchScript($install_callable, FALSE, [$this->io, $root_robo_extra]);
-            //call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
+            list($class, $method) = explode('::', $install_callable);
+            $class_file = $loader->findFile($class);
+            require $class_file;
+
+            call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
         }
     }
 }
