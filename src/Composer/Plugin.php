@@ -143,6 +143,24 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
     protected function installOrUpdateRoboPlugin(PackageInterface $package) {
         $root_extra = $this->composer->getPackage()->getExtra();
         $root_robo_extra = !empty($root_extra['robo']) ? $root_extra['robo'] : [];
+        $extra = $package->getExtra();
+
+        if (!empty($extra['robo']['operations']['install'])) {
+            // Right now we expect this to be a static callable, e.g.,
+            // \\My\\Class::myCallbackMethod.
+            $install_callable = ltrim($extra['robo']['operations']['install'], '\\');
+            list($class, $method) = explode('::', $install_callable);
+            $this->requirePluginClass($package, $class);
+
+            call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
+        }
+    }
+
+    /**
+     * @param \Composer\Package\PackageInterface $package
+     * @param string $class
+     */
+    protected function requirePluginClass(PackageInterface $package, $class) {
         $package_map = $this->composer->getAutoloadGenerator()->buildPackageMap(
           $this->composer->getInstallationManager(),
           $this->composer->getPackage(),
@@ -154,16 +172,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface {
         );
         $loader = $this->composer->getAutoloadGenerator()->createLoader($autoloads);
 
-        $extra = $package->getExtra();
-        if (!empty($extra['robo']['operations']['install'])) {
-            // Right now we expect this to be a static callable, e.g.,
-            // \\My\\Class::myCallbackMethod.
-            $install_callable = ltrim($extra['robo']['operations']['install'], '\\');
-            list($class, $method) = explode('::', $install_callable);
-            $class_file = $loader->findFile($class);
-            require $class_file;
-
-            call_user_func_array($install_callable, [$this->io, $root_robo_extra]);
-        }
+        $class_file = $loader->findFile($class);
+        require $class_file;
     }
 }
